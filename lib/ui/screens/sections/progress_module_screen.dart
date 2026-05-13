@@ -75,7 +75,6 @@ class ProgressModuleScreen extends ConsumerWidget {
                       columns: columns,
                       metrics: metrics,
                       scheme: scheme,
-                      ref: ref,
                     ),
                     const SizedBox(height: 18),
                     Text(

@@ -1,107 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
-/// Inline autoplay preview using Flutter’s public sample clip (network).
-/// Audio is muted by default for autoplay-friendly behavior.
-class WellnessPreviewVideo extends StatefulWidget {
+/// Lightweight “preview” strip (no `video_player` dependency).
+///
+/// Shows a poster-style frame; tap opens the Flutter docs sample clip in the
+/// default browser via [url_launcher]-free approach: copy-friendly label only.
+/// For a real inline player, add `video_player` and run `flutter pub get`.
+class WellnessPreviewVideo extends StatelessWidget {
   const WellnessPreviewVideo({
     super.key,
     this.compact = false,
     this.borderRadius = 18,
   });
 
-  /// Shorter height for secondary placements (tabs, cards).
-  final bool compact;
-  final double borderRadius;
-
-  /// Stable HTTPS sample used across Flutter documentation demos.
   static const demoVideoUrl =
       'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
-  @override
-  State<WellnessPreviewVideo> createState() => _WellnessPreviewVideoState();
-}
-
-class _WellnessPreviewVideoState extends State<WellnessPreviewVideo> {
-  VideoPlayerController? _controller;
-  bool _failed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _boot();
-  }
-
-  Future<void> _boot() async {
-    try {
-      final c = VideoPlayerController.networkUrl(Uri.parse(WellnessPreviewVideo.demoVideoUrl));
-      await c.initialize();
-      await c.setLooping(true);
-      await c.setVolume(0);
-      if (!mounted) {
-        await c.dispose();
-        return;
-      }
-      setState(() => _controller = c);
-      await c.play();
-    } catch (_) {
-      if (mounted) setState(() => _failed = true);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
+  final bool compact;
+  final double borderRadius;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final h = widget.compact ? 160.0 : 220.0;
+    final h = compact ? 160.0 : 220.0;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(widget.borderRadius),
+      borderRadius: BorderRadius.circular(borderRadius),
       child: SizedBox(
         height: h,
         width: double.infinity,
-        child: _buildInner(scheme),
-      ),
-    );
-  }
-
-  Widget _buildInner(ColorScheme scheme) {
-    if (_failed) {
-      return Container(
-        alignment: Alignment.center,
-        color: scheme.surfaceContainerHighest.withOpacity(0.55),
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          'Preview video unavailable (offline or blocked).\n'
-          'Connect to the network to stream the demo clip.',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                scheme.primaryContainer.withOpacity(0.55),
+                scheme.surfaceContainerHighest.withOpacity(0.75),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                // Avoid url_launcher dependency; show where the clip lives.
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Sample clip: $demoVideoUrl'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.play_circle_fill_rounded,
+                      size: compact ? 52 : 64,
+                      color: scheme.primary.withOpacity(0.92),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Product preview',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: scheme.onSurface,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Tap for sample video URL (add video_player for inline playback).',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            ),
+          ),
         ),
-      );
-    }
-
-    final c = _controller;
-    if (c == null || !c.value.isInitialized) {
-      return Container(
-        alignment: Alignment.center,
-        color: scheme.surfaceContainerHighest.withOpacity(0.45),
-        child: const CircularProgressIndicator(strokeWidth: 2),
-      );
-    }
-
-    return FittedBox(
-      fit: BoxFit.cover,
-      child: SizedBox(
-        width: c.value.size.width,
-        height: c.value.size.height,
-        child: VideoPlayer(c),
       ),
     );
   }

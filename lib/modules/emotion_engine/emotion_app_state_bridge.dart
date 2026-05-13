@@ -48,33 +48,36 @@ class _EmotionAppStateBridgeState extends ConsumerState<EmotionAppStateBridge> {
   }
 
   void _sync() {
-    final state = widget.service.signalState;
-    final app = ref.read(appStateProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final state = widget.service.signalState;
+      final app = ref.read(appStateProvider);
 
-    // Heuristic stress: prioritize explicit indicators; fallback to label confidence.
-    final calmFocus = state.wellnessIndicators['calmFocus'];
-    final expressiveEnergy = state.wellnessIndicators['expressiveEnergy'];
-    final live = state.liveFaceSignal;
+      // Heuristic stress: prioritize explicit indicators; fallback to label confidence.
+      final calmFocus = state.wellnessIndicators['calmFocus'];
+      final expressiveEnergy = state.wellnessIndicators['expressiveEnergy'];
+      final live = state.liveFaceSignal;
 
-    double stress01 = app.stressScore;
-    if (calmFocus != null) {
-      stress01 = (1 - calmFocus).clamp(0.0, 1.0);
-    } else if (live != null) {
-      final stressed = live.confidenceFor(EmotionLabel.stressed);
-      final angry = live.confidenceFor(EmotionLabel.angry);
-      final sad = live.confidenceFor(EmotionLabel.sad);
-      stress01 = (0.55 * stressed + 0.25 * angry + 0.20 * sad).clamp(0.0, 1.0);
-    } else if (expressiveEnergy != null) {
-      // Treat very low energy as mild fatigue stress (soft signal).
-      stress01 = (0.35 + (0.4 * (1 - expressiveEnergy))).clamp(0.0, 1.0);
-    }
+      double stress01 = app.stressScore;
+      if (calmFocus != null) {
+        stress01 = (1 - calmFocus).clamp(0.0, 1.0);
+      } else if (live != null) {
+        final stressed = live.confidenceFor(EmotionLabel.stressed);
+        final angry = live.confidenceFor(EmotionLabel.angry);
+        final sad = live.confidenceFor(EmotionLabel.sad);
+        stress01 = (0.55 * stressed + 0.25 * angry + 0.20 * sad).clamp(0.0, 1.0);
+      } else if (expressiveEnergy != null) {
+        // Treat very low energy as mild fatigue stress (soft signal).
+        stress01 = (0.35 + (0.4 * (1 - expressiveEnergy))).clamp(0.0, 1.0);
+      }
 
-    app.updateStressScore(stress01);
+      app.updateStressScore(stress01);
 
-    final nextState = stress01 >= 0.78
-        ? EmotionalState.overloaded
-        : (stress01 >= 0.52 ? EmotionalState.elevated : EmotionalState.calm);
-    app.updateEmotionalState(nextState);
+      final nextState = stress01 >= 0.78
+          ? EmotionalState.overloaded
+          : (stress01 >= 0.52 ? EmotionalState.elevated : EmotionalState.calm);
+      app.updateEmotionalState(nextState);
+    });
   }
 
   @override

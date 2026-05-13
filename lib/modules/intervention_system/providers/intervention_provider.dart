@@ -34,9 +34,18 @@ class InterventionProvider extends ChangeNotifier {
   List<String> get dopamineReplacements => _dopamineReplacements;
 
   void updateContext(EmotionalContext value) {
+    if (_sameContext(_context, value)) return;
     _context = value;
     _syncState();
     notifyListeners();
+  }
+
+  static bool _sameContext(EmotionalContext a, EmotionalContext b) {
+    return a.stressLevel == b.stressLevel &&
+        a.emotionalOverload == b.emotionalOverload &&
+        a.emotionalStability == b.emotionalStability &&
+        a.fatigue == b.fatigue &&
+        a.wellnessScore == b.wellnessScore;
   }
 
   void _syncState() {

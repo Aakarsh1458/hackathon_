@@ -42,17 +42,18 @@ class _InterventionBridge extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final app = ref.watch(appStateProvider);
     final s = app.stressScore;
-    // Minimal context mapping (0–1 floats) to keep things reactive without coupling.
-    provider.updateContext(
-      EmotionalContext(
-        stressLevel: s,
-        emotionalOverload: s,
-        emotionalStability: (1.0 - s * 0.75).clamp(0.0, 1.0),
-        fatigue: (0.2 + s * 0.55 + (1.0 - app.recoveryProgress) * 0.25)
-            .clamp(0.0, 1.0),
-        wellnessScore: (1.0 - s * 0.6).clamp(0.0, 1.0),
-      ),
+    final next = EmotionalContext(
+      stressLevel: s,
+      emotionalOverload: s,
+      emotionalStability: (1.0 - s * 0.75).clamp(0.0, 1.0),
+      fatigue: (0.2 + s * 0.55 + (1.0 - app.recoveryProgress) * 0.25)
+          .clamp(0.0, 1.0),
+      wellnessScore: (1.0 - s * 0.6).clamp(0.0, 1.0),
     );
+    // Never call [ChangeNotifier.notifyListeners] (or other providers) synchronously from build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      provider.updateContext(next);
+    });
     return InterventionHubScreen(provider: provider);
   }
 }

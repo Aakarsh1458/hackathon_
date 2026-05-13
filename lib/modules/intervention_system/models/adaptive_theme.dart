@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 
 import 'emotional_context.dart';
@@ -24,7 +26,7 @@ class AdaptiveTheme {
 
   factory AdaptiveTheme.fromContext(EmotionalContext context) {
     final calmBias = (context.stressLevel + context.emotionalOverload) / 2;
-    final stableBias = context.emotionalStability.clamp(0, 1);
+    final stableBias = context.emotionalStability.clamp(0.0, 1.0);
 
     final isCalmMode = calmBias > 0.55 || context.fatigue > 0.6;
     return AdaptiveTheme(

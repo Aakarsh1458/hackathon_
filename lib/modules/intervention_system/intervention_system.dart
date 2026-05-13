@@ -8,6 +8,7 @@
 /// TODO(integration): Host app injects companion state from Companion System.
 library intervention_system;
 
+export 'module_facade.dart';
 export 'animations/adaptive_animation_controller.dart';
 export 'models/adaptive_theme.dart';
 export 'models/crisis_mode.dart';

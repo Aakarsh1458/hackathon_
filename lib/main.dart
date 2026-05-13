@@ -7,8 +7,13 @@ import 'core/config/firebase_bootstrap.dart';
 import 'core/di/service_locator.dart';
 import 'core/errors/global_error_handler.dart';
 import 'core/services/logging/app_logger.dart';
+import 'modules/ai_core/module_facade.dart';
+import 'modules/companion_system/module_facade.dart';
+import 'modules/emotion_engine/module_facade.dart';
+import 'modules/intervention_system/module_facade.dart';
 import 'ui/themes/app_theme.dart';
 import 'ui/navigation/app_router.dart';
+import 'shared/providers/app_state_provider.dart';
 import 'shared/providers/theme_mode_provider.dart';
 
 /// Application entry — infrastructure only.
@@ -20,6 +25,7 @@ Future<void> main() async {
   await GlobalErrorHandler.install();
   await bootstrapFirebase();
   await configureDependencies();
+  _registerModules();
 
   AppLogger.instance.info('Shell bootstrap complete');
 
@@ -37,6 +43,13 @@ Future<void> main() async {
   );
 }
 
+void _registerModules() {
+  AICoreModuleFacade().register();
+  EmotionEngineModuleFacade().register();
+  CompanionModuleFacade().register();
+  InterventionSystemModuleFacade().register();
+}
+
 class WellnessShellApp extends ConsumerWidget {
   const WellnessShellApp({super.key});
 
@@ -44,6 +57,7 @@ class WellnessShellApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
     final router = ref.watch(goRouterProvider);
+    ref.watch(appStateProvider);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,

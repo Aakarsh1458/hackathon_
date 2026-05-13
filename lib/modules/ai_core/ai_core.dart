@@ -2,6 +2,7 @@ library ai_core;
 
 // NOTE: Public export surface for the AI Core module.
 // Keep exports narrow to avoid naming conflicts with other module contracts.
+export 'module_facade.dart';
 
 // Core analytics exports.
 export 'models/behavioral_pattern.dart';

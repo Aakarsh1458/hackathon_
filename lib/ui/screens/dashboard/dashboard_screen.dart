@@ -9,6 +9,7 @@ import '../../widgets/glass_card.dart';
 import '../../widgets/module_containers.dart';
 import '../../widgets/score_ring.dart';
 import '../../widgets/sparkline.dart';
+import '../../../shared/providers/app_state_provider.dart';
 import '../../../shared/providers/demo_metrics_provider.dart';
 
 /// Demo-ready dashboard (placeholders only) with safe module containers.
@@ -20,6 +21,7 @@ class DashboardScreen extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final layout = screenClassOf(context);
     final metrics = ref.watch(demoMetricsProvider);
+    final appState = ref.watch(appStateProvider);
 
     final columns = switch (layout) {
       ScreenClass.compact => 1,
@@ -53,7 +55,7 @@ class DashboardScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'Gentle signals + module containers. No module internals live here.',
+                              'State: ${appState.emotionalState.name} | Companion: ${appState.companionState}',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: scheme.onSurfaceVariant,
                                   ),
@@ -137,8 +139,8 @@ class DashboardScreen extends ConsumerWidget {
                     children: const [
                       GlassCard(child: EmotionModuleContainer()),
                       GlassCard(child: AICoreContainer()),
-                      GlassCard(child: InterventionModuleContainer()),
-                      GlassCard(child: CompanionModuleContainer()),
+                      GlassCard(child: InterventionContainer()),
+                      GlassCard(child: CompanionContainer()),
                     ],
                   ),
                   const SizedBox(height: 14),

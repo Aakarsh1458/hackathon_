@@ -2,7 +2,7 @@
 /// journaling, and timelines.
 ///
 /// Host application setup (handled outside this module):
-/// - Add path dependency: `emotion_engine: path: modules/emotion_engine`
+/// - Add path dependency: `emotion_engine: path: lib/modules/emotion_engine`
 /// - Request `camera` / runtime permissions before starting live analysis
 /// - Pass `getApplicationDocumentsDirectory` into [EmotionService.bootstrapPersistence]
 ///

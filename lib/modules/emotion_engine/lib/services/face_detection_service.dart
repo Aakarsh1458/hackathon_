@@ -1,24 +1,10 @@
-import 'package:google_mlkit_commons/google_mlkit_commons.dart';
-import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
-
-/// Thin wrapper around ML Kit face detection for testability and isolation.
+/// Demo-safe face detection stub.
+///
+/// The host app can replace this implementation once `google_mlkit_*` deps are added.
 class FaceDetectionService {
-  FaceDetectionService({FaceDetector? detector})
-      : _detector = detector ??
-            FaceDetector(
-              options: FaceDetectorOptions(
-                enableContours: false,
-                enableLandmarks: true,
-                enableClassification: true,
-                enableTracking: true,
-                minFaceSize: 0.12,
-                performanceMode: FaceDetectorMode.fast,
-              ),
-            );
+  FaceDetectionService();
 
-  final FaceDetector _detector;
+  Future<List<Object>> detect(Object image) async => const <Object>[];
 
-  Future<List<Face>> detect(InputImage image) => _detector.processImage(image);
-
-  Future<void> dispose() => _detector.close();
+  Future<void> dispose() async {}
 }

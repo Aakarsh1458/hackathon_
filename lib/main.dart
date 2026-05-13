@@ -20,17 +20,17 @@ import 'shared/providers/theme_mode_provider.dart';
 ///
 /// Module teams: register facades via [ModuleRegistrationBus] from your composition root (TODO).
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await GlobalErrorHandler.install();
-  await bootstrapFirebase();
-  await configureDependencies();
-  _registerModules();
-
-  AppLogger.instance.info('Shell bootstrap complete');
-
   runZonedGuarded(
-    () {
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      await GlobalErrorHandler.install();
+      await bootstrapFirebase();
+      await configureDependencies();
+      _registerModules();
+
+      AppLogger.instance.info('Shell bootstrap complete');
+
       runApp(
         const ProviderScope(
           child: WellnessShellApp(),

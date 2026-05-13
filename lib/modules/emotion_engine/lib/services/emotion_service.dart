@@ -1,15 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:uuid/uuid.dart';
 
 import '../models/emotion_data.dart';
 import '../models/mood_entry.dart';
 import '../models/signal_state.dart';
-import '../utils/camera_input_image_utils.dart';
 import 'emotion_estimation_service.dart';
 import 'emotion_persistence_service.dart';
 import 'face_detection_service.dart';
@@ -25,12 +22,10 @@ class EmotionService extends ChangeNotifier {
     EmotionEstimationService? estimation,
     EmotionPersistenceService? persistence,
     SignalAggregationService? aggregation,
-    Uuid? uuid,
   })  : _faceDetection = faceDetection ?? FaceDetectionService(),
         _estimation = estimation ?? const EmotionEstimationService(),
         _persistence = persistence ?? EmotionPersistenceService(),
-        _aggregation = aggregation ?? const SignalAggregationService(),
-        _uuid = uuid ?? const Uuid() {
+        _aggregation = aggregation ?? const SignalAggregationService() {
     _rebuildState();
   }
 
@@ -38,9 +33,9 @@ class EmotionService extends ChangeNotifier {
   final EmotionEstimationService _estimation;
   final EmotionPersistenceService _persistence;
   final SignalAggregationService _aggregation;
-  final Uuid _uuid;
 
-  CameraController? _controller;
+  // Demo-safe build: camera is disabled unless host app adds dependencies.
+  Object? _controller;
   bool _processing = false;
   int _frameTick = 0;
   String? _lastError;
@@ -51,7 +46,7 @@ class EmotionService extends ChangeNotifier {
   SignalState _state = SignalState(updatedAt: DateTime.now());
 
   SignalState get signalState => _state;
-  CameraController? get cameraController => _controller;
+  Object? get cameraController => _controller;
   bool get isAnalyzing => _processing;
 
   void updateOrientation(DeviceOrientation orientation) {
@@ -67,34 +62,8 @@ class EmotionService extends ChangeNotifier {
   }
 
   Future<void> ensureCamera({bool preferFront = true}) async {
-    if (_controller != null) return;
-    try {
-      final cameras = await availableCameras();
-      if (cameras.isEmpty) {
-        _lastError = 'No cameras available on this device.';
-        _rebuildState();
-        return;
-      }
-      final lens = preferFront
-          ? cameras.firstWhere(
-              (c) => c.lensDirection == CameraLensDirection.front,
-              orElse: () => cameras.first,
-            )
-          : cameras.firstWhere(
-              (c) => c.lensDirection == CameraLensDirection.back,
-              orElse: () => cameras.first,
-            );
-      _controller = CameraController(
-        lens,
-        ResolutionPreset.medium,
-        enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.yuv420,
-      );
-      await _controller!.initialize();
-      _lastError = null;
-    } catch (e) {
-      _lastError = e.toString();
-    }
+    _lastError =
+        'Camera/ML features are disabled in this demo build (missing dependencies).';
     _rebuildState();
   }
 
@@ -102,73 +71,23 @@ class EmotionService extends ChangeNotifier {
   ///
   /// TODO(integration): Request `camera` permission in the app shell before calling.
   Future<void> startLiveAnalysis({int processEveryNthFrame = 2}) async {
-    final c = _controller;
-    if (c == null || !c.value.isInitialized) {
-      _lastError = 'Camera not initialized.';
-      _rebuildState();
-      return;
-    }
-    if (_processing) return;
-    _processing = true;
-    _frameTick = 0;
-    await c.startImageStream((image) async {
-      if (!_processing) return;
-      _frameTick++;
-      if (_frameTick % processEveryNthFrame != 0) return;
-      await _handleFrame(image, c);
-    });
+    _lastError =
+        'Live camera analysis is unavailable (missing camera/mlkit dependencies).';
     _rebuildState();
   }
 
   Future<void> stopLiveAnalysis() async {
     _processing = false;
-    final c = _controller;
-    if (c != null && c.value.isStreamingImages) {
-      await c.stopImageStream();
-    }
     _rebuildState();
   }
 
   Future<void> disposeCamera() async {
     await stopLiveAnalysis();
-    await _controller?.dispose();
     _controller = null;
     _rebuildState();
   }
 
-  Future<void> _handleFrame(CameraImage image, CameraController controller) async {
-    try {
-      final rotation = computeInputImageRotation(
-        description: controller.description,
-        deviceOrientation: _orientation,
-      );
-      final input = inputImageFromCameraImage(image: image, rotation: rotation);
-      if (input == null) return;
-
-      final faces = await _faceDetection.detect(input);
-      if (faces.isEmpty) {
-        _live = null;
-        _rebuildState();
-        return;
-      }
-      final primary = faces.first;
-      final estimated = _estimation.estimate(
-        primary,
-        image.width,
-        image.height,
-      );
-      _live = estimated;
-      _recentFace.add(estimated);
-      while (_recentFace.length > 96) {
-        _recentFace.removeAt(0);
-      }
-      await _persistence.appendFaceSignal(estimated);
-      _rebuildState();
-    } catch (e) {
-      _lastError = e.toString();
-      _rebuildState();
-    }
-  }
+  // Frame processing intentionally omitted in demo-safe build.
 
   Future<void> saveJournal(
     String body, {
@@ -177,7 +96,7 @@ class EmotionService extends ChangeNotifier {
     final text = body.trim();
     if (text.isEmpty) return;
     final entry = MoodEntry.fromTextWithSignal(
-      id: _uuid.v4(),
+      id: 'local-${DateTime.now().microsecondsSinceEpoch}',
       body: text,
       signal: linkCurrentSignal ? _live : null,
     );
@@ -203,16 +122,7 @@ class EmotionService extends ChangeNotifier {
     _processing = false;
     unawaited(_persistence.flushPendingWrites());
     unawaited(_faceDetection.dispose());
-    final c = _controller;
     _controller = null;
-    if (c != null) {
-      unawaited(() async {
-        if (c.value.isStreamingImages) {
-          await c.stopImageStream();
-        }
-        await c.dispose();
-      }());
-    }
     super.dispose();
   }
 }

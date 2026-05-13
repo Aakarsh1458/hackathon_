@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/interfaces/module_registration_bus.dart';
 import '../../shared/interfaces/wellness_module_contract.dart';
 import '../../shared/providers/app_state_provider.dart';
+import 'models/emotional_context.dart';
 import 'providers/intervention_provider.dart';
 import 'screens/intervention_hub_screen.dart';
 

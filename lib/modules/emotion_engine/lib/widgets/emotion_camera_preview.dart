@@ -1,4 +1,3 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
 import '../services/emotion_service.dart';
@@ -19,29 +18,28 @@ class EmotionCameraPreview extends StatelessWidget {
     return ListenableBuilder(
       listenable: service,
       builder: (context, _) {
-        final controller = service.cameraController;
         final live = service.signalState.liveFaceSignal;
-        if (controller == null || !controller.value.isInitialized) {
+        // Demo-safe build: camera is disabled unless host app adds dependencies.
+        if (service.cameraController == null) {
           return const Center(
             child: Text(
-              'Camera warming up…',
+              'Camera preview unavailable in this demo build.',
               style: TextStyle(color: Colors.white70),
             ),
           );
         }
         return LayoutBuilder(
           builder: (context, constraints) {
-            final ar = controller.value.aspectRatio;
             return Stack(
               fit: StackFit.expand,
               children: [
-                ClipRect(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: constraints.maxHeight * ar,
-                      height: constraints.maxHeight,
-                      child: CameraPreview(controller),
+                const DecoratedBox(
+                  decoration: BoxDecoration(color: Colors.black54),
+                  child: Center(
+                    child: Text(
+                      'Add camera + ML dependencies to enable live preview.',
+                      style: TextStyle(color: Colors.white70),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),

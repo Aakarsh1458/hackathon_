@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/interfaces/module_registration_bus.dart';
-import '../../shared/interfaces/wellness_module_contract.dart';
+import '../../lib/shared/interfaces/module_registration_bus.dart';
+import '../../lib/shared/interfaces/wellness_module_contract.dart';
 
 import 'chat/groq_ai_provider.dart';
 import 'chat/groq_config.dart';

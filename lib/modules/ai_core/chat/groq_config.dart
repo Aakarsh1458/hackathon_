@@ -55,10 +55,24 @@ class GroqConfig {
     };
   }
 
+  static GroqConfig? _cache;
+
+  /// Resolved once after [ensureEnvironmentLoaded]; reused by chat + voice.
+  static GroqConfig get resolvedOrThrow {
+    final c = _cache;
+    if (c == null) {
+      throw StateError(
+        'GroqConfig not loaded. Ensure main() awaits GroqConfig.fromEnvironment().',
+      );
+    }
+    return c;
+  }
+
   static Future<GroqConfig> fromEnvironment() async {
+    if (_cache != null) return _cache!;
     await ensureEnvironmentLoaded();
     final resolvedApiKey = _valueFromEnv('GROQ_API_KEY', defaultValue: '');
-    return GroqConfig(
+    _cache = GroqConfig(
       apiKey: resolvedApiKey.isEmpty ? null : resolvedApiKey,
       modelName: _valueFromEnv('MODEL_NAME', defaultValue: defaultModelName),
       fallbackModelName: _valueFromEnv(
@@ -66,6 +80,7 @@ class GroqConfig {
         defaultValue: fallbackModelNameDefault,
       ),
     );
+    return _cache!;
   }
 
   GroqConfig copyWith({

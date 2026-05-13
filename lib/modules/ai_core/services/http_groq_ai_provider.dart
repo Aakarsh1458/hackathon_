@@ -46,10 +46,23 @@ class HttpGroqAIProvider implements GroqAIProvider {
     );
 
     if (resp.statusCode < 200 || resp.statusCode >= 300) {
-      throw Exception('Groq request failed (${resp.statusCode})');
+      var detail = resp.body;
+      try {
+        final err = jsonDecode(resp.body);
+        if (err is Map<String, dynamic>) {
+          final inner = err['error'];
+          if (inner is Map<String, dynamic> && inner['message'] is String) {
+            detail = inner['message'] as String;
+          }
+        }
+      } catch (_) {}
+      throw Exception('Groq ${resp.statusCode}: $detail');
     }
 
-    final decoded = jsonDecode(resp.body) as Map<String, Object?>;
+    final decoded = jsonDecode(resp.body);
+    if (decoded is! Map<String, dynamic>) {
+      throw Exception('Groq returned unexpected JSON shape.');
+    }
     final choices = decoded['choices'] as List<dynamic>? ?? const [];
     if (choices.isEmpty) return '';
     final message = (choices.first as Map<String, dynamic>)['message'] as Map<String, dynamic>?;

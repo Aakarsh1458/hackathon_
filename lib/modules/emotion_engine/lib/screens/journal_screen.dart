@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../ui/widgets/journal_voice_bar.dart';
+import '../../../ai_core/screens/voice_wellness_assistant_screen.dart';
 import '../services/emotion_service.dart';
 import '../widgets/journal_entry_tile.dart';
 
@@ -84,8 +86,13 @@ class _JournalScreenState extends State<JournalScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  JournalVoiceBar(controller: _controller),
                   const SizedBox(height: 12),
-                  Row(
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       FilledButton(
                         onPressed: _submit,
@@ -99,12 +106,25 @@ class _JournalScreenState extends State<JournalScreen> {
                         ),
                         child: const Text('Save entry'),
                       ),
-                      const SizedBox(width: 12),
                       TextButton(
                         onPressed: () => _submit(linkSignal: false),
                         child: const Text(
                           'Save without signal',
                           style: TextStyle(color: Colors.white54),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const VoiceWellnessAssistantScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.record_voice_over_rounded, color: Colors.white70),
+                        label: const Text(
+                          'Voice assistant',
+                          style: TextStyle(color: Colors.white70),
                         ),
                       ),
                     ],

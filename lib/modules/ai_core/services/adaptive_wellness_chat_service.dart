@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 import '../models/chat_message.dart';
 import '../models/emotional_context.dart';
 import '../services/conversation_memory.dart';
@@ -74,18 +76,30 @@ class AdaptiveWellnessChatService {
     final profile = adaptationEngine.compute(emotionalContext);
     final systemHint = _composeDynamicHint(emotionalContext, profile);
 
-    final modelReply = await groq.generateResponse(
-      messages: [
-        ChatMessage(
-          id: _id('s'),
-          role: ChatRole.system,
-          content: systemHint,
-          timestamp: DateTime.now(),
-        ),
-        ...memory.snapshot().where((m) => m.role != ChatRole.system),
-      ],
-      options: options,
-    );
+    String modelReply;
+    try {
+      modelReply = await groq.generateResponse(
+        messages: [
+          ChatMessage(
+            id: _id('s'),
+            role: ChatRole.system,
+            content: systemHint,
+            timestamp: DateTime.now(),
+          ),
+          ...memory.snapshot().where((m) => m.role != ChatRole.system),
+        ],
+        options: options,
+      );
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('AdaptiveWellnessChat Groq error: $e');
+        debugPrint('$st');
+      }
+      modelReply =
+          'I’m having trouble reaching the AI service right now. '
+          'You can still journal or try voice again in a moment. '
+          'What’s one small thing that felt manageable today?';
+    }
 
     final assistant = ChatMessage(
       id: _id('a'),

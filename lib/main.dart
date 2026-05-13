@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/config/firebase_bootstrap.dart';
 import 'core/di/service_locator.dart';
 import 'modules/ai_core/chat/groq_config.dart';
+import 'shared/providers/shell_voice_overrides.dart';
 import 'core/errors/global_error_handler.dart';
 import 'core/services/logging/app_logger.dart';
 import 'modules/ai_core/module_facade.dart';
@@ -26,6 +27,7 @@ Future<void> main() async {
       WidgetsFlutterBinding.ensureInitialized();
 
       await GroqConfig.ensureEnvironmentLoaded();
+      await GroqConfig.fromEnvironment();
 
       await GlobalErrorHandler.install();
       await bootstrapFirebase();
@@ -35,8 +37,9 @@ Future<void> main() async {
       AppLogger.instance.info('Shell bootstrap complete');
 
       runApp(
-        const ProviderScope(
-          child: WellnessShellApp(),
+        ProviderScope(
+          overrides: shellVoiceProviderOverrides(),
+          child: const WellnessShellApp(),
         ),
       );
     },

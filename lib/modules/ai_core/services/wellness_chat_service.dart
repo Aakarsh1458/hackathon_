@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../chat/ai_provider.dart';
 import '../chat/chat_models.dart';
 import '../memory/conversation_memory.dart';
@@ -101,8 +103,12 @@ class WellnessChatService {
         crisisMode: false,
       );
       return ChatResponse(assistantMessage: assistant, recommendations: recs);
-    } catch (_) {
-      // Safe fallback: never expose provider errors or stack traces.
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('WellnessChatService Groq error: $e');
+        debugPrint('$st');
+      }
+      // Safe fallback: never expose provider errors or stack traces in release.
       final assistantText =
           'I’m here with you. I ran into a temporary issue generating that response, but we can still take a small next step together.\n\n'
           'If you’d like, tell me one sentence: what feels heaviest right now?';
@@ -174,7 +180,11 @@ class WellnessChatService {
         buffer.write(delta);
         yield ChatMessageChunk(textDelta: delta, isFinal: false);
       }
-    } catch (_) {
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('WellnessChatService stream Groq error: $e');
+        debugPrint('$st');
+      }
       final assistantText =
           'I’m here with you. There was a temporary issue while generating my response, but we can still slow down together.\n\n'
           'What emotion are you noticing most strongly right now?';

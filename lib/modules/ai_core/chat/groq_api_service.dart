@@ -34,12 +34,23 @@ class GroqApiService {
           .timeout(_timeout);
     } on TimeoutException {
       throw const GroqTimeoutException();
-    } catch (_) {
-      throw const GroqRequestFailedException('Unable to reach Groq service.');
+    } catch (e) {
+      throw GroqRequestFailedException('Network error before response: $e');
     }
 
     _throwIfHttpError(statusCode: response.statusCode, body: response.body);
-    final decoded = jsonDecode(response.body);
+
+    Object decoded;
+    try {
+      decoded = jsonDecode(response.body);
+    } catch (e) {
+      final snippet = response.body.length > 280
+          ? '${response.body.substring(0, 280)}…'
+          : response.body;
+      throw GroqRequestFailedException(
+        'Groq returned non‑JSON (${response.statusCode}): $snippet',
+      );
+    }
     if (decoded is! Map<String, dynamic>) {
       throw const GroqRequestFailedException('Invalid Groq response payload.');
     }

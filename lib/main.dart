@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/config/firebase_bootstrap.dart';
 import 'core/di/service_locator.dart';
+import 'modules/ai_core/chat/groq_config.dart';
 import 'core/errors/global_error_handler.dart';
 import 'core/services/logging/app_logger.dart';
 import 'modules/ai_core/module_facade.dart';
@@ -23,6 +24,8 @@ Future<void> main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      await GroqConfig.ensureEnvironmentLoaded();
 
       await GlobalErrorHandler.install();
       await bootstrapFirebase();

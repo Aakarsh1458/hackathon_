@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../shared/providers/auth_dependency_providers.dart';
 import '../../shared/providers/theme_mode_provider.dart';
 import '../navigation/route_paths.dart';
+import '../widgets/page_edge_navigation.dart';
 
 class AppShellScaffold extends ConsumerWidget {
   const AppShellScaffold({
@@ -25,6 +26,9 @@ class AppShellScaffold extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
+
+    final idx = navigationShell.currentIndex;
+    final lastTab = RoutePaths.shellTabPaths.length - 1;
 
     return Scaffold(
       appBar: AppBar(
@@ -51,7 +55,43 @@ class AppShellScaffold extends ConsumerWidget {
           ),
         ],
       ),
-      body: navigationShell,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          navigationShell,
+          SafeArea(
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 6,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: EdgeNavButton(
+                      icon: Icons.chevron_left_rounded,
+                      onPressed:
+                          idx > 0 ? () => navigationShell.goBranch(idx - 1) : null,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 6,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: EdgeNavButton(
+                      icon: Icons.chevron_right_rounded,
+                      onPressed: idx < lastTab
+                          ? () => navigationShell.goBranch(idx + 1)
+                          : null,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         backgroundColor: scheme.surfaceContainerHighest.withOpacity(0.65),
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
@@ -84,11 +124,6 @@ class AppShellScaffold extends ConsumerWidget {
             label: 'Progress',
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(RoutePaths.journal),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Quick note'),
       ),
       drawer: Drawer(
         child: SafeArea(

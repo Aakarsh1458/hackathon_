@@ -8,6 +8,7 @@ import '../../../shared/providers/auth_dependency_providers.dart';
 import '../../../shared/providers/auth_demo_mode_provider.dart';
 import '../../navigation/route_paths.dart';
 import '../../widgets/app_gradient_background.dart';
+import '../../widgets/page_edge_navigation.dart';
 
 /// Email / Google entry points — wiring only; no wellness logic.
 class LoginScreen extends ConsumerStatefulWidget {
@@ -58,8 +59,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      body: AppGradientBackground(
+    return PageEdgeNavigation(
+      onBack: () => context.go(RoutePaths.onboarding),
+      onForward: () => context.go(RoutePaths.dashboard),
+      child: Scaffold(
+        body: AppGradientBackground(
         child: SafeArea(
           child: Center(
             child: ConstrainedBox(
@@ -176,6 +180,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

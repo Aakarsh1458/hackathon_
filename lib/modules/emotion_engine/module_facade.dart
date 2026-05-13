@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/interfaces/module_registration_bus.dart';
 import '../../shared/interfaces/wellness_module_contract.dart';
+import '../../shared/providers/emotion_engine_service_provider.dart';
 import 'emotion_app_state_bridge.dart';
 import 'lib/screens/emotion_dashboard_screen.dart';
-import 'lib/services/emotion_service.dart';
 
 class EmotionEngineModuleFacade implements WellnessModuleContract {
   const EmotionEngineModuleFacade();
@@ -37,18 +37,11 @@ class _EmotionModuleRoot extends ConsumerStatefulWidget {
 }
 
 class _EmotionModuleRootState extends ConsumerState<_EmotionModuleRoot> {
-  late final EmotionService _service = EmotionService();
-
-  @override
-  void dispose() {
-    _service.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final service = ref.watch(emotionEngineServiceProvider);
     return EmotionAppStateBridge(
-      service: _service,
+      service: service,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -63,7 +56,7 @@ class _EmotionModuleRootState extends ConsumerState<_EmotionModuleRoot> {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => EmotionDashboardScreen(service: _service),
+                    builder: (_) => EmotionDashboardScreen(service: service),
                   ),
                 );
               },
@@ -72,9 +65,9 @@ class _EmotionModuleRootState extends ConsumerState<_EmotionModuleRoot> {
             ),
             const SizedBox(height: 10),
             AnimatedBuilder(
-              animation: _service,
+              animation: service,
               builder: (context, _) {
-                final state = _service.signalState;
+                final state = service.signalState;
                 final last = state.liveFaceSignal?.dominant.name ?? 'none';
                 final indicator = state.wellnessIndicators.entries.isEmpty
                     ? null

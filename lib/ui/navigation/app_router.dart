@@ -13,9 +13,12 @@ import '../layouts/app_shell_scaffold.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
+import '../screens/sections/companion_module_screen.dart';
 import '../screens/sections/crisis_support_screen.dart';
+import '../screens/sections/insights_module_screen.dart';
+import '../screens/sections/journal_module_screen.dart';
+import '../screens/sections/progress_module_screen.dart';
 import '../screens/sections/settings_screen.dart';
-import '../screens/sections/placeholder_section_screen.dart';
 import 'route_paths.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -88,12 +91,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.insights,
-                builder: (context, state) => const PlaceholderSectionScreen(
-                  title: 'Emotional Insights',
-                  subtitle:
-                      'UI container only. Future modules can inject real insight widgets and charts.',
-                  icon: Icons.insights_rounded,
-                ),
+                builder: (context, state) => const InsightsModuleScreen(),
               ),
             ],
           ),
@@ -101,12 +99,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.journal,
-                builder: (context, state) => const PlaceholderSectionScreen(
-                  title: 'Journal',
-                  subtitle:
-                      'A calm journaling surface. Hook this to storage and module-based analysis later.',
-                  icon: Icons.edit_note_rounded,
-                ),
+                builder: (context, state) => const JournalModuleScreen(),
               ),
             ],
           ),
@@ -114,12 +107,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.companion,
-                builder: (context, state) => const PlaceholderSectionScreen(
-                  title: 'Companion',
-                  subtitle:
-                      'Companion UI container. The companion module will plug into this surface later.',
-                  icon: Icons.favorite_rounded,
-                ),
+                builder: (context, state) => const CompanionModuleScreen(),
               ),
             ],
           ),
@@ -127,12 +115,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.progress,
-                builder: (context, state) => const PlaceholderSectionScreen(
-                  title: 'Recovery Progress',
-                  subtitle:
-                      'Progress UI container. Real tracking and analytics integrate via modules later.',
-                  icon: Icons.rocket_launch_rounded,
-                ),
+                builder: (context, state) => const ProgressModuleScreen(),
               ),
             ],
           ),

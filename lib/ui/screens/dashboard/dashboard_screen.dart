@@ -11,6 +11,8 @@ import '../../widgets/score_ring.dart';
 import '../../widgets/sparkline.dart';
 import '../../../shared/providers/app_state_provider.dart';
 import '../../../shared/providers/demo_metrics_provider.dart';
+import '../../../shared/providers/emotion_engine_service_provider.dart';
+import '../../widgets/wellness_preview_video.dart';
 
 /// Demo-ready dashboard (placeholders only) with safe module containers.
 class DashboardScreen extends ConsumerWidget {
@@ -22,6 +24,7 @@ class DashboardScreen extends ConsumerWidget {
     final layout = screenClassOf(context);
     final metrics = ref.watch(demoMetricsProvider);
     final appState = ref.watch(appStateProvider);
+    ref.watch(emotionEngineServiceProvider);
 
     final columns = switch (layout) {
       ScreenClass.compact => 1,
@@ -71,6 +74,15 @@ class DashboardScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  Text(
+                    'Product preview',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  const WellnessPreviewVideo(),
+                  const SizedBox(height: 18),
                   _Grid(
                     columns: columns,
                     gap: 12,

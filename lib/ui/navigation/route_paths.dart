@@ -11,6 +11,15 @@ abstract final class RoutePaths {
   static const companion = '/companion';
   static const progress = '/progress';
 
+  /// Bottom-nav order — keep aligned with [StatefulShellRoute] branches.
+  static const List<String> shellTabPaths = <String>[
+    dashboard,
+    insights,
+    journal,
+    companion,
+    progress,
+  ];
+
   // Top-level routes shown above the shell
   static const crisis = '/crisis';
   static const settings = '/settings';

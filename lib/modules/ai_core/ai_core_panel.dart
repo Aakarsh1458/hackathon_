@@ -58,7 +58,7 @@ class AICorePanel extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          'Tip: Add `GROQ_API_KEY` via `.env` or `--dart-define` for live responses. Otherwise, chat uses safe fallbacks.',
+          'Uses Groq when `GROQ_API_KEY` is set in `.env`. Offline or blocked requests fall back to safe scripted replies.',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
         ),
       ],

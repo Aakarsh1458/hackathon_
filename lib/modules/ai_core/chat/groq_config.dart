@@ -31,9 +31,13 @@ class GroqConfig {
   static Future<void> ensureEnvironmentLoaded() async {
     if (dotenv.isInitialized) return;
     try {
-      await dotenv.load(fileName: '.env');
+      await dotenv.load(
+        fileName: '.env',
+        mergeWithPlatform: true,
+        isOptional: true,
+      );
     } catch (_) {
-      // `.env` is optional in some environments.
+      // Bundled `.env` may be absent on CI clones without secrets — fallback to dart-define only.
     }
   }
 

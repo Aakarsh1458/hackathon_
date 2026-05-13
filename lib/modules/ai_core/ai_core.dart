@@ -22,4 +22,5 @@ export 'services/http_groq_ai_provider.dart';
 export 'services/wellness_chat_service.dart';
 export 'services/voice_conversation_service.dart';
 export 'services/voice_io.dart';
+export 'services/adaptive_wellness_chat_service.dart';
 

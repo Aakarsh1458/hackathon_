@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/interfaces/module_registration_bus.dart';
 import '../../shared/interfaces/wellness_module_contract.dart';
+import 'companion_panel.dart';
 
 class CompanionModuleFacade implements WellnessModuleContract {
   const CompanionModuleFacade();
@@ -14,7 +15,10 @@ class CompanionModuleFacade implements WellnessModuleContract {
 
   @override
   Widget buildRoot(BuildContext context) {
-    return const _CompanionPlaceholder();
+    return const Padding(
+      padding: EdgeInsets.all(14),
+      child: CompanionPanel(),
+    );
   }
 
   @override
@@ -25,19 +29,4 @@ class CompanionModuleFacade implements WellnessModuleContract {
   }
 }
 
-class _CompanionPlaceholder extends StatelessWidget {
-  const _CompanionPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Text(
-          'Companion system is syncing.\nGentle support reactions will appear here.',
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
+// Placeholder removed: module now renders a safe panel.

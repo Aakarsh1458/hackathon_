@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/interfaces/module_registration_bus.dart';
 import '../../shared/interfaces/wellness_module_contract.dart';
+import 'ai_core_panel.dart';
 
 /// Module facade for `ai_core`.
 ///
@@ -18,14 +19,9 @@ class AICoreModuleFacade implements WellnessModuleContract {
 
   @override
   Widget buildRoot(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Text(
-          'AI Core module connected.\nChatbot + recommendations are staged for safe integration.',
-          textAlign: TextAlign.center,
-        ),
-      ),
+    return const Padding(
+      padding: EdgeInsets.all(14),
+      child: AICorePanel(),
     );
   }
 

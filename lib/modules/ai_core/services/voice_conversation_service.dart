@@ -7,7 +7,7 @@ import '../services/conversation_memory.dart';
 import '../services/emotional_adaptation.dart';
 import '../services/safety_guardrails.dart';
 import 'voice_io.dart';
-import 'wellness_chat_service.dart';
+import 'adaptive_wellness_chat_service.dart';
 
 enum VoiceTurnState {
   idle,
@@ -37,7 +37,7 @@ class VoiceConversationSnapshot {
 class VoiceConversationService {
   final SpeechToTextClient stt;
   final TextToSpeechClient tts;
-  final WellnessChatService chat;
+  final AdaptiveWellnessChatService chat;
   final ConversationMemory memory;
   final SafetyGuardrails safety;
   final EmotionalAdaptationEngine adaptationEngine;

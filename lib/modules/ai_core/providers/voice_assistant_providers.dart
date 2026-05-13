@@ -5,7 +5,7 @@ import '../services/emotional_adaptation.dart';
 import '../services/safety_guardrails.dart';
 import '../services/voice_conversation_service.dart';
 import '../services/voice_io.dart';
-import '../services/wellness_chat_service.dart';
+import '../services/adaptive_wellness_chat_service.dart';
 import 'voice_assistant_controller.dart';
 
 /// Host app must override these with real implementations wired to:
@@ -22,8 +22,8 @@ final ttsClientProvider = Provider<TextToSpeechClient>((ref) {
 });
 
 /// Host app provides WellnessChatService with a GroqAIProvider implementation.
-final wellnessChatServiceProvider = Provider<WellnessChatService>((ref) {
-  throw UnimplementedError('Provide WellnessChatService from host app (with GroqAIProvider).');
+final wellnessChatServiceProvider = Provider<AdaptiveWellnessChatService>((ref) {
+  throw UnimplementedError('Provide AdaptiveWellnessChatService from host app (with GroqAIProvider).');
 });
 
 final voiceConversationServiceProvider = Provider<VoiceConversationService>((ref) {

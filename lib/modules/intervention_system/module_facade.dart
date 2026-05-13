@@ -41,12 +41,16 @@ class _InterventionBridge extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final app = ref.watch(appStateProvider);
-    // Minimal context mapping to keep things reactive without coupling.
+    final s = app.stressScore;
+    // Minimal context mapping (0–1 floats) to keep things reactive without coupling.
     provider.updateContext(
       EmotionalContext(
-        stressScore: (app.stressScore * 100).round(),
-        emotionalStability: (100 - (app.stressScore * 75)).round().clamp(0, 100),
-        overloadRisk: (app.stressScore * 100).round(),
+        stressLevel: s,
+        emotionalOverload: s,
+        emotionalStability: (1.0 - s * 0.75).clamp(0.0, 1.0),
+        fatigue: (0.2 + s * 0.55 + (1.0 - app.recoveryProgress) * 0.25)
+            .clamp(0.0, 1.0),
+        wellnessScore: (1.0 - s * 0.6).clamp(0.0, 1.0),
       ),
     );
     return InterventionHubScreen(provider: provider);

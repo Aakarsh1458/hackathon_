@@ -7,8 +7,8 @@ import 'core/config/firebase_bootstrap.dart';
 import 'core/di/service_locator.dart';
 import 'core/errors/global_error_handler.dart';
 import 'core/services/logging/app_logger.dart';
-import 'core/theme/app_theme.dart';
-import 'routes/app_router.dart';
+import 'ui/themes/app_theme.dart';
+import 'ui/navigation/app_router.dart';
 import 'shared/providers/theme_mode_provider.dart';
 
 /// Application entry — infrastructure only.

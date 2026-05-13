@@ -15,8 +15,9 @@ class GroqConfig {
     this.maxTokens = 900,
   });
 
-  static const defaultModelName = 'llama3-70b-8192';
-  static const fallbackModelNameDefault = 'mixtral-8x7b-32768';
+  /// Groq production IDs — older names like `llama3-70b-8192` often 404.
+  static const defaultModelName = 'llama-3.3-70b-versatile';
+  static const fallbackModelNameDefault = 'llama-3.1-8b-instant';
 
   /// If null/empty, provider returns a graceful missing-key error.
   final String? apiKey;

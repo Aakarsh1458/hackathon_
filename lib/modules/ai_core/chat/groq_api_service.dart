@@ -98,12 +98,13 @@ class GroqApiService {
     }
   }
 
-  Never _throwIfHttpError({
+  /// Throws only when [statusCode] indicates failure (non‑2xx).
+  void _throwIfHttpError({
     required int statusCode,
     required String body,
   }) {
     if (statusCode >= 200 && statusCode < 300) {
-      throw StateError('No error to throw for success status.');
+      return;
     }
 
     String detail = body.trim();

@@ -32,56 +32,7 @@ class AICoreModuleFacade implements WellnessModuleContract {
 
   @override
   Widget buildRoot(BuildContext context) {
-    final cfg = config ?? GroqConfig.fromEnvironment();
-
-    if (cfg.apiKey == null || cfg.apiKey!.isEmpty || cfg.modelName == null || cfg.modelName!.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('AI Core'),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.api_outlined,
-                          size: 44, color: Theme.of(context).colorScheme.primary),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Groq AI is not configured for this build.',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Set environment values (example):\n'
-                        '- `GROQ_API_KEY`\n'
-                        '- `MODEL_NAME`\n\n'
-                        'This module never stores or hardcodes secrets.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              height: 1.35,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
+    final cfg = config;
     final aiProvider = GroqAIProvider(config: cfg);
     final chatService = WellnessChatService(
       aiProvider: aiProvider,
@@ -89,7 +40,7 @@ class AICoreModuleFacade implements WellnessModuleContract {
       promptBuilder: const WellnessPromptBuilder(),
       recommendationEngine: RecommendationEngine(),
       crisisEscalation: const CrisisEscalation(),
-      modelName: cfg.modelName ?? '',
+      modelName: cfg?.modelName ?? '',
     );
 
     return WellnessChatWidget(

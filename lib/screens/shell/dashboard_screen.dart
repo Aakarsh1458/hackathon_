@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/constants/app_constants.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/app_gradient_background.dart';
-import '../../shared/providers/auth_dependency_providers.dart';
-import '../../shared/providers/theme_mode_provider.dart';
+import '../../core/widgets/glass_card.dart';
+import '../../core/widgets/module_containers.dart';
+import '../../core/widgets/score_ring.dart';
+import '../../core/widgets/sparkline.dart';
+import '../../routes/route_paths.dart';
+import '../../shared/providers/demo_metrics_provider.dart';
 
-/// Placeholder landing — reserved slots for modules; no feature logic here.
+/// Demo-ready dashboard (placeholders only) with safe module containers.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -14,81 +19,150 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final layout = screenClassOf(context);
+    final metrics = ref.watch(demoMetricsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppConstants.appName),
-        actions: [
-          IconButton(
-            tooltip: 'Toggle theme',
-            onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
-            icon: Icon(
-              Theme.of(context).brightness == Brightness.dark
-                  ? Icons.light_mode_outlined
-                  : Icons.dark_mode_outlined,
-            ),
-          ),
-          IconButton(
-            tooltip: 'Sign out',
-            onPressed: () async {
-              await ref.read(authRepositoryProvider).signOut();
-            },
-            icon: const Icon(Icons.logout_rounded),
-          ),
-        ],
-      ),
-      body: AppGradientBackground(
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: layout == ScreenClass.expanded ? 960 : 640,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Home',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+    final columns = switch (layout) {
+      ScreenClass.compact => 1,
+      ScreenClass.medium => 2,
+      ScreenClass.expanded => 3,
+    };
+
+    return AppGradientBackground(
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1100),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Today',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Gentle signals + module containers. No module internals live here.',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      ScoreRing(
+                        score0to100: metrics.wellnessScore,
+                        label: 'wellness',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _Grid(
+                    columns: columns,
+                    gap: 12,
+                    children: [
+                      GlassCard(
+                        child: _MetricTile(
+                          title: 'Stress index',
+                          valueText: '${metrics.stressIndex}/100',
+                          icon: Icons.bolt_rounded,
+                          accent: scheme.tertiary,
+                          footer: Sparkline(points: metrics.trend),
+                        ),
+                      ),
+                      GlassCard(
+                        child: _MetricTile(
+                          title: 'Recovery progress',
+                          valueText: '${(metrics.recoveryProgress * 100).round()}%',
+                          icon: Icons.rocket_launch_rounded,
+                          accent: scheme.primary,
+                          footer: LinearProgressIndicator(
+                            value: metrics.recoveryProgress,
+                            minHeight: 8,
+                            borderRadius: BorderRadius.circular(999),
                           ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Reserved module slots — teams integrate via '
-                      '[WellnessModuleContract] without modifying this screen.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      GlassCard(
+                        child: _MetricTile(
+                          title: 'Daily streak',
+                          valueText: '${metrics.streakDays} days',
+                          icon: Icons.local_fire_department_rounded,
+                          accent: scheme.secondary,
+                          footer: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Small steps count.',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => ref.read(demoMetricsProvider.notifier).bumpStreak(),
+                                child: const Text('Mark today'),
+                              ),
+                            ],
                           ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Module surfaces',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 10),
+                  _Grid(
+                    columns: columns,
+                    gap: 12,
+                    children: const [
+                      GlassCard(child: EmotionModuleContainer()),
+                      GlassCard(child: AICoreContainer()),
+                      GlassCard(child: InterventionModuleContainer()),
+                      GlassCard(child: CompanionModuleContainer()),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  GlassCard(
+                    child: Row(
+                      children: [
+                        const Icon(Icons.edit_note_rounded),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Quick journal entry',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                        FilledButton(
+                          onPressed: () => context.go(RoutePaths.journal),
+                          child: const Text('Open'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
-                    _ModulePlaceholderCard(
-                      title: 'Emotion engine',
-                      subtitle: 'Folder: lib/modules/emotion_engine/',
-                      icon: Icons.blur_on_rounded,
-                    ),
-                    const SizedBox(height: 12),
-                    _ModulePlaceholderCard(
-                      title: 'AI core',
-                      subtitle: 'Folder: lib/modules/ai_core/',
-                      icon: Icons.hub_outlined,
-                    ),
-                    const SizedBox(height: 12),
-                    _ModulePlaceholderCard(
-                      title: 'Companion system',
-                      subtitle: 'Folder: lib/modules/companion_system/',
-                      icon: Icons.favorite_outline,
-                    ),
-                    const SizedBox(height: 12),
-                    _ModulePlaceholderCard(
-                      title: 'Intervention system',
-                      subtitle: 'Folder: lib/modules/intervention_system/',
-                      icon: Icons.shield_outlined,
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 60),
+                ],
               ),
             ),
           ),
@@ -98,52 +172,105 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-class _ModulePlaceholderCard extends StatelessWidget {
-  const _ModulePlaceholderCard({
+class _MetricTile extends StatelessWidget {
+  const _MetricTile({
     required this.title,
-    required this.subtitle,
+    required this.valueText,
     required this.icon,
+    required this.accent,
+    required this.footer,
   });
 
   final String title;
-  final String subtitle;
+  final String valueText;
   final IconData icon;
+  final Color accent;
+  final Widget footer;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Card(
-      elevation: 0,
-      color: scheme.surfaceContainerHighest.withOpacity(0.45),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Icon(icon, size: 28, color: scheme.primary),
-            const SizedBox(width: 16),
+            Container(
+              height: 34,
+              width: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: accent.withOpacity(0.18),
+              ),
+              child: Icon(icon, color: accent, size: 18),
+            ),
+            const SizedBox(width: 10),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: scheme.onSurfaceVariant,
+                    ),
               ),
             ),
           ],
         ),
-      ),
+        const SizedBox(height: 10),
+        Text(
+          valueText,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+        ),
+        const SizedBox(height: 12),
+        footer,
+      ],
+    );
+  }
+}
+
+class _Grid extends StatelessWidget {
+  const _Grid({
+    required this.columns,
+    required this.gap,
+    required this.children,
+  });
+
+  final int columns;
+  final double gap;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    if (columns <= 1) {
+      return Column(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i != children.length - 1) SizedBox(height: gap),
+          ],
+        ],
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        final tileW = (w - gap * (columns - 1)) / columns;
+
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final child in children)
+              SizedBox(
+                width: tileW,
+                child: child,
+              ),
+          ],
+        );
+      },
     );
   }
 }

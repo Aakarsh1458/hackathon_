@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../shared/providers/app_shell_state_provider.dart';
 import '../../shared/providers/auth_dependency_providers.dart';
+import '../../shared/providers/auth_demo_mode_provider.dart';
 import '../../shared/providers/auth_session_provider.dart';
 import '../layouts/app_shell_scaffold.dart';
 import '../screens/auth/login_screen.dart';
@@ -40,9 +42,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final loc = state.matchedLocation;
       final onboarding = loc == RoutePaths.onboarding;
       final loggingIn = loc == RoutePaths.login;
+      final demoMode = ref.read(authDemoModeProvider);
+      final firebaseReady = Firebase.apps.isNotEmpty;
 
       if (!onboardingComplete && !onboarding) {
         return RoutePaths.onboarding;
+      }
+
+      // Demo fallback: keep app bootable even if Firebase/auth are incomplete.
+      if (user == null && (!firebaseReady || demoMode)) {
+        return null;
       }
 
       if (user == null && !loggingIn && !onboarding) {
